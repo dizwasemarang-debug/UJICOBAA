@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Room</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; background: #f0f2f5; }
+        #kotak-chat { width: 100%; height: 350px; border: 1px solid #ccc; overflow-y: scroll; padding: 15px; background: white; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; }
+        #input-pesan { width: 75%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        #tombol-kirim { width: 20%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        #nama { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+    <h2>Ruang Chat Publik</h2>
+    <input type="text" id="nama" placeholder="Masukkan nama panggilan Anda...">
+    <div id="kotak-chat"></div>
+    <div style="display: flex; justify-content: space-between;">
+        <input type="text" id="input-pesan" placeholder="Ketik pesan di sini...">
+        <button id="tombol-kirim">Kirim</button>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const kotakChat = document.getElementById('kotak-chat');
+        const inputPesan = document.getElementById('input-pesan');
+        const namaUser = document.getElementById('nama');
+        const tombolKirim = document.getElementById('tombol-kirim');
+
+        tombolKirim.addEventListener('click', () => {
+            const nama = namaUser.value || 'Anonim';
+            const pesan = inputPesan.value;
+            if (pesan.trim() !== "") {
+                socket.emit('kirim-pesan', { nama, pesan });
+                inputPesan.value = '';
+            }
+        });
+
+        socket.on('pesan-baru', (data) => {
+            const elemenPesan = document.createElement('p');
+            elemenPesan.innerHTML = `<strong>${data.nama}:</strong> ${data.pesan}`;
+            kotakChat.appendChild(elemenPesan);
+            kotakChat.scrollTop = kotakChat.scrollHeight;
+        });
+    </script>
+</body>
+</html>
